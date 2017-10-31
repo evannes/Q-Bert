@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.SubScene?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane alignment="center" hgap="10" prefHeight="800.0" prefWidth="1000.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="qbert3D.Controller3D">
+    <children>
+        <BorderPane prefHeight="800.0" prefWidth="1000.0">
+         <bottom>
+            <HBox prefHeight="100.0" prefWidth="200.0" style="-fx-background-color: turquoise;" BorderPane.alignment="CENTER">
+               <children>
+                  <Slider fx:id="rotator" blockIncrement="1.0" max="360.0" />
+               </children></HBox>
+         </bottom>
+         <center>
+            <SubScene fx:id="subScene" depthBuffer="true" height="700.0" width="1000.0" BorderPane.alignment="CENTER">
+              <root>
+                <Region />
+              </root>
+            </SubScene>
+         </center></BorderPane>
+    </children>
+    <columnConstraints>
+        <ColumnConstraints />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints />
+    </rowConstraints>
+</GridPane>
