@@ -38,7 +38,8 @@ public class Game3D {
             public void handle(long now) {
                 moved = player.updatePlayer(now);
                 if(moved){
-
+                    brickBoard.checkCollision(player.getPosX().getValue(),player.getPosY().getValue(),player.getPosZ().getValue(),
+                            player.getRadius(),player.getRadius(),player.getRadius());
                 }
             }
         };

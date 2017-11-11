@@ -20,18 +20,19 @@ public class BrickBoard3D {
     private int boxX = 200;
     private int boxY;
     private int boxZ = (boxSizeY+1)*7;
-    private PhongMaterial aliveColor = new PhongMaterial();
+    //private PhongMaterial aliveColor = new PhongMaterial();
     private PhongMaterial deadColor = new PhongMaterial();
-    private PhongMaterial material;
+    private PhongMaterial aliveColor;
+    int aliveBoxes = 28;
 
     public BrickBoard3D(){
-        setBoxColor(aliveColor,Color.web("#66B6D1"));
+        //setBoxColor(aliveColor,Color.web("#66B6D1"));
         setBoxColor(deadColor,Color.CORNSILK);
         Image diffuseMap = FileHandling.initImage("C:\\Users\\Bruker\\IdeaProjects\\Q-bert\\src\\img\\b.png");
         Image bumpMap = FileHandling.initImage("C:\\Users\\Bruker\\IdeaProjects\\Q-bert\\src\\img\\bricks.jpg");
-        material = new PhongMaterial();
-        material.setDiffuseColor(Color.LIGHTBLUE); // DIMGRAY/DIMGREY
-        material.setSpecularColor(Color.WHITE);
+        aliveColor = new PhongMaterial();
+        aliveColor.setDiffuseColor(Color.LIGHTBLUE); // DIMGRAY/DIMGREY
+        aliveColor.setSpecularColor(Color.WHITE);
         //material.setBumpMap(bumpMap);
         createBoxes();
     }
@@ -46,7 +47,7 @@ public class BrickBoard3D {
                 box.setTranslateX(boxX);
                 box.setTranslateY(boxY);
                 box.setTranslateZ(boxZ); // 100-120
-                box.setMaterial(material);
+                box.setMaterial(aliveColor);
 
                 boxes[i][j] = box;
                 bBoxes[i][i] = new BoundingBox(boxX,boxY,boxZ,boxSizeX,boxSizeY,boxSizeZ);
@@ -61,9 +62,51 @@ public class BrickBoard3D {
         //boxZ = boxSize+1;
     }
 
+    public void checkCollision(double x, double y, double z, double width, double height, double depth){
+        int numBoxes = 7;
+
+        for(int i = 0; i < boxes.length; i++){
+
+            for(int j = 0; j < boxes.length; j++) {
+                if(j < numBoxes) {
+                    Box box = boxes[i][j];
+                    BoundingBox bounds = new BoundingBox(box.getTranslateX()-50,box.getTranslateY()-50,box.getTranslateZ()-50,box.getWidth(),box.getHeight(),box.getDepth());
+                    if(bounds.intersects(x,y,z,width,height,depth)){
+                        if(box.getMaterial().equals(aliveColor)) {
+                            box.setMaterial(deadColor);
+                            aliveBoxes--;
+                            break;
+                        }
+                    }
+                }
+            }
+            numBoxes--;
+        }
+
+        if(aliveBoxes <= 0) {
+            Task<Box> task = c -> c.setMaterial(new PhongMaterial(Color.DARKORCHID));
+            traverseBoxes(task,boxes);
+        }
+    }
+
     public void setBoxColor(PhongMaterial material, Color color){
         material.setDiffuseColor(color);
         material.setSpecularColor(Color.web("#BFEFFF"));
+    }
+
+    public <T> void traverseBoxes(Task<T> task, T[][] tArray){
+
+        int numBoxes = 7;
+
+        for(int i = 0; i < boxes.length; i++) {
+
+            for (int j = 0; j < boxes.length; j++) {
+                if (j < numBoxes) {
+                    task.performTask(tArray[i][j]);
+                }
+            }
+            numBoxes--;
+        }
     }
 
     public Box[][] getBoxes(){

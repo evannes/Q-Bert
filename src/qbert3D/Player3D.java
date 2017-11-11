@@ -3,6 +3,7 @@ package qbert3D;
 import eliseGL.FileHandling;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.geometry.BoundingBox;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
@@ -14,7 +15,9 @@ import javafx.scene.shape.Sphere;
  */
 public class Player3D {
 
-    private Sphere sphere = new Sphere(50);
+    private double radius = 50;
+    private Sphere sphere = new Sphere(radius);
+    private BoundingBox bBox;
     private DoubleProperty posX;
     private DoubleProperty posY;
     private DoubleProperty posZ;
@@ -33,6 +36,7 @@ public class Player3D {
         this.posX = new SimpleDoubleProperty(posX);
         this.posY = new SimpleDoubleProperty(posY);
         this.posZ = new SimpleDoubleProperty(posZ);
+        this.bBox = new BoundingBox(posX,posY,posZ,50,50,50);
 
         Image diffuseMap = FileHandling.initImage("C:\\Users\\Bruker\\IdeaProjects\\Q-bert\\src\\img\\rar.png");
         Image bumpMap = FileHandling.initImage("C:\\Users\\Bruker\\IdeaProjects\\Q-bert\\src\\img\\hex.jpg");
@@ -112,6 +116,10 @@ public class Player3D {
         }
     }
 
+    private void updateBoundingBox(){
+
+    }
+
     public boolean getIsMoving(){
         return isMoving;
     }
@@ -166,5 +174,9 @@ public class Player3D {
 
     public Sphere getSphere(){
         return sphere;
+    }
+
+    public double getRadius(){
+        return this.radius;
     }
 }
