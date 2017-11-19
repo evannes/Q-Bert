@@ -1,20 +1,29 @@
 package qbert3D;
 
 import eliseGL.FileHandling;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.BoundingBox;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.Sphere;
+import javafx.util.Duration;
 
 /**
  * Created by Elise Haram Vannes on 12.10.2017.
  */
 public class Player3D {
 
+    private Box[][] boxes = new Box[7][7];
     private double radius = 50;
     private Sphere sphere = new Sphere(radius);
     private BoundingBox bBox;
@@ -24,6 +33,7 @@ public class Player3D {
     private PhongMaterial playerColor = new PhongMaterial(Color.LIGHTGREEN);//CORAL);
     private Material material;
 
+    private int lives = 3;
     private long moveStart;
     private boolean isMoving = false;
     private boolean left = false;
@@ -31,6 +41,7 @@ public class Player3D {
     private boolean right = false;
     private boolean down = false;
     private int direction = 0;  // 0 = null, 1 = left, 2 = up, 3 = right, 4 = down
+    private boolean isFalling = false;
 
     public Player3D(double posX, double posY, double posZ){
         this.posX = new SimpleDoubleProperty(posX);
@@ -67,57 +78,175 @@ public class Player3D {
     // evt returnere boolean
     public boolean move(long time){
         //System.out.println("right: " +right);
-        if(left && direction == 1){
-            posX.set(posX.get()-140);
-            posY.set(posY.get()-90);
-            sphere.setTranslateX(posX.get());
-            sphere.setTranslateY(posY.get());
+        if(!isMoving) {
+            if (left && direction == 1) {
+                isMoving = true;
 
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        else if(up && direction == 2){
-            posY.set(posY.get()-90);
-            posZ.set(posZ.get()+140);
-            sphere.setTranslateY(posY.get());
-            sphere.setTranslateZ(posZ.get());
+                Timeline tl = new Timeline();
 
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        else if(right && direction == 3){
-            posX.set(posX.get()+140);
-            posY.set(posY.get()+90);
-            sphere.setTranslateX(posX.get());
-            sphere.setTranslateY(posY.get());
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        else if(down && direction == 4){
-            posY.set(posY.get()+90);
-            posZ.set(posZ.get()-140);
-            sphere.setTranslateY(posY.get());
-            sphere.setTranslateZ(posZ.get());
+                KeyValue keyX = new KeyValue(sphere.translateXProperty(), sphere.getTranslateX() - 140);
+                KeyFrame frameX = new KeyFrame(Duration.millis(500), keyX);
 
-            moveStart = time;
-            isMoving = true;
-            return true;
+                KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() - 90, Interpolator.TANGENT(Duration.millis(500), 100, Duration.millis(500), -100));
+                KeyFrame frameY = new KeyFrame(Duration.millis(500), keyY);
+
+                tl.getKeyFrames().addAll(frameX, frameY);
+                tl.play();
+
+                posX.set(posX.get() - 140);
+                posY.set(posY.get() - 90);
+                moveStart = time;
+                tl.setOnFinished(new EventHandler<ActionEvent>() {
+                                     @Override
+                                     public void handle(ActionEvent event) {
+                                         isMoving = false;
+                                         if(!checkCollision()){
+                                             fallDown();
+                                         }
+                                     }
+                                 }
+                );
+                return true;
+            } else if (up && direction == 2) {
+
+                isMoving = true;
+                Timeline tl = new Timeline();
+
+                KeyValue keyX = new KeyValue(sphere.translateZProperty(), sphere.getTranslateZ() + 140);
+                KeyFrame frameX = new KeyFrame(Duration.millis(500), keyX);
+
+                KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() - 90, Interpolator.TANGENT(Duration.millis(500), 100, Duration.millis(500), -100));
+                KeyFrame frameY = new KeyFrame(Duration.millis(500), keyY);
+
+                tl.getKeyFrames().addAll(frameX, frameY);
+                tl.play();
+
+                posY.set(posY.get() - 90);
+                posZ.set(posZ.get() + 140);
+
+                tl.setOnFinished(new EventHandler<ActionEvent>() {
+                                     @Override
+                                     public void handle(ActionEvent event) {
+                                         isMoving = false;
+                                         if(!checkCollision()){
+                                             fallDown();
+                                         }
+                                     }
+                                 }
+                );
+                moveStart = time;
+                return true;
+            } else if (right && direction == 3) {
+
+                isMoving = true;
+                Timeline tl = new Timeline();
+
+                KeyValue keyX = new KeyValue(sphere.translateXProperty(), sphere.getTranslateX() + 140);
+                KeyFrame frameX = new KeyFrame(Duration.millis(500), keyX);
+
+                KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 90, Interpolator.TANGENT(Duration.millis(500), 100, Duration.millis(500), -100));
+                KeyFrame frameY = new KeyFrame(Duration.millis(500), keyY);
+
+                tl.getKeyFrames().addAll(frameX, frameY);
+                tl.play();
+
+                posX.set(posX.get() + 140);
+                posY.set(posY.get() + 90);
+                moveStart = time;
+
+                tl.setOnFinished(new EventHandler<ActionEvent>() {
+                                     @Override
+                                     public void handle(ActionEvent event) {
+                                         isMoving = false;
+                                         if(!checkCollision()){
+                                             fallDown();
+                                         }
+                                     }
+                                 }
+                );
+                return true;
+            } else if (down && direction == 4) {
+
+                isMoving = true;
+                Timeline tl = new Timeline();
+
+                KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 90, Interpolator.TANGENT(Duration.millis(500), 10, Duration.millis(500), -10));
+                KeyFrame frameX = new KeyFrame(Duration.millis(500), keyY);
+
+                KeyValue keyZ = new KeyValue(sphere.translateZProperty(), sphere.getTranslateZ() - 140);
+                KeyFrame frameY = new KeyFrame(Duration.millis(500), keyZ);
+
+                tl.getKeyFrames().addAll(frameX, frameY);
+                tl.play();
+
+                posY.set(posY.get() + 90);
+                posZ.set(posZ.get() - 140);
+                tl.setOnFinished((ActionEvent event) -> {
+                                         isMoving = false;
+                                        if(!checkCollision()){
+                                            fallDown();
+                                        }
+                                 }
+                );
+                moveStart = time;
+                // hvis den etter animasjonen ikke har landet på bakken... skal den fortsette nedover.
+
+                return true;
+            }
         }
         return false;
+    }
+
+    public void fallDown(){
+        //sphere.setOpacity(0);
+        KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 400);
+        KeyFrame frameX = new KeyFrame(Duration.millis(400), keyY);
+        Timeline tl = new Timeline();
+        tl.getKeyFrames().add(frameX);
+        tl.play();
     }
 
     public void stopMoving(long time){
         if(time - moveStart > 200000000){
             // stopMoving
-            isMoving = false;
+            //isMoving = false;
         }
     }
 
-    private void updateBoundingBox(){
+    public BoundingBox getBoundingBox(){
+        return new BoundingBox(sphere.getTranslateX(),sphere.getTranslateY(),sphere.getTranslateZ(),
+                radius,radius,radius);
+    }
 
+    public boolean checkCollision(){
+        int numBoxes = 7;
+
+        for(int i = 0; i < boxes.length; i++) {
+
+            for (int j = 0; j < boxes.length; j++) {
+                if (j < numBoxes) {
+                    Box box = boxes[i][j];
+                    BoundingBox bounds = new BoundingBox(box.getTranslateX() - 50, box.getTranslateY() - 50, box.getTranslateZ() - 50, box.getWidth(), box.getHeight(), box.getDepth());
+                    if (bounds.intersects(posX.doubleValue(), posY.doubleValue(), posZ.doubleValue(), radius, radius, radius)) {
+                        return true;
+                    }
+                }
+            }
+            numBoxes--;
+        }
+        return false;
+    }
+
+    public Sphere getSphere(){
+        return sphere;
+    }
+
+    public boolean isFalling(){
+        return isFalling;
+    }
+
+    public void setBoxes(Box[][] boxes){
+    this.boxes = boxes;
     }
 
     public boolean getIsMoving(){
@@ -142,41 +271,34 @@ public class Player3D {
 
     public boolean getDown(){ return down; }
 
-    public void setDown(boolean down) { this.down = down; }
-
-    public int getDirection(){ return direction; }
-
-    public void setDirection(int direction) { this.direction = direction; }
+    public void setDown(boolean down){
+    this.down = down;}
 
     public DoubleProperty getPosX(){
         return posX;
-    }
-
-    public void setPosX(DoubleProperty posX){
-        this.posX = posX;
     }
 
     public DoubleProperty getPosY(){
         return posY;
     }
 
-    public void setPosY(DoubleProperty posY){
-        this.posY = posY;
-    }
-
     public DoubleProperty getPosZ(){
         return posZ;
     }
 
-    public void setPosZ(DoubleProperty posZ){
-        this.posZ = posZ;
-    }
-
-    public Sphere getSphere(){
-        return sphere;
-    }
-
     public double getRadius(){
-        return this.radius;
+        return radius;
+    }
+
+    public void setDirection(int direction){
+        this.direction = direction;
+    }
+
+    public int getLives(){
+        return lives;
+    }
+
+    public void decrementLives(){
+        lives--;
     }
 }

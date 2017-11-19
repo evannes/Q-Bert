@@ -8,6 +8,8 @@ import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SubScene;
 import javafx.scene.control.Slider;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -24,7 +26,7 @@ public class Controller3D implements Initializable{
     @FXML
     Slider rotator;
 
-    private Group group = new Group();
+    private Pane group = new Pane();
     private Group rotationGrop;
     private PerspectiveCamera camera = new PerspectiveCamera(true);
     Game3D game3D;
@@ -58,8 +60,9 @@ public class Controller3D implements Initializable{
         //camera.setRotate(-30); // -10
         camera.setFieldOfView(150); // 100*/
 
+        /*group.setStyle("-fx-background-color: slateblue;");
         Camera camera;
-        game3D = new Game3D(group,new Player3D(3,4,5));
+        game3D = new Game3D(group,new Player3D(3,4,5),);
         group.setRotationAxis(Rotate.Y_AXIS);
         group.setRotate(45);
 
@@ -77,7 +80,7 @@ public class Controller3D implements Initializable{
                 {
                     group.setRotationAxis(Rotate.Y_AXIS);
                     group.setRotate((double)newValue);
-                });
+                });*/
 
     }
 }

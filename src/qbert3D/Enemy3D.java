@@ -1,14 +1,21 @@
 package qbert3D;
 
 import eliseGL.FileHandling;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.BoundingBox;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
+import javafx.util.Duration;
 
 /**
  * Created by Elise Haram Vannes on 12.10.2017.
@@ -54,65 +61,72 @@ public class Enemy3D {
         sphere.setTranslateZ(posZ);
     }
 
-    public boolean updateEnemy(long time){
-        if(!isMoving){
-            return move(time);
-        }
-        else {
-            stopMoving(time);
-            return false;
+    public void move(){
+        if(Math.random() >= 0.5){
+            moveRight();
+        } else {
+            moveDown();
         }
     }
-    // evt returnere boolean
-    private boolean move(long time){
-        //System.out.println("right: " +right);
-        if(left && direction == 1){
-            posX.set(posX.get()-140);
-            posY.set(posY.get()-90);
-            sphere.setTranslateX(posX.get());
-            sphere.setTranslateY(posY.get());
 
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        else if(up && direction == 2){
-            posY.set(posY.get()-90);
-            posZ.set(posZ.get()+140);
-            sphere.setTranslateY(posY.get());
-            sphere.setTranslateZ(posZ.get());
+    public void moveRight(){    // hvis den faller utenfor brettet må det registreres så den fjernes fra arraylisten
+        isMoving = true;
+        Timeline tl = new Timeline();
 
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        else if(right && direction == 3){
-            posX.set(posX.get()+140);
-            posY.set(posY.get()+90);
-            sphere.setTranslateX(posX.get());
-            sphere.setTranslateY(posY.get());
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        else if(down && direction == 4){
-            posY.set(posY.get()+90);
-            posZ.set(posZ.get()-140);
-            sphere.setTranslateY(posY.get());
-            sphere.setTranslateZ(posZ.get());
+        KeyValue keyX = new KeyValue(sphere.translateXProperty(), sphere.getTranslateX() + 140);
+        KeyFrame frameX = new KeyFrame(Duration.millis(500), keyX);
 
-            moveStart = time;
-            isMoving = true;
-            return true;
-        }
-        return false;
+        KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 90, Interpolator.TANGENT(Duration.millis(500), 100, Duration.millis(500), -100));
+        KeyFrame frameY = new KeyFrame(Duration.millis(500), keyY);
+
+        tl.getKeyFrames().addAll(frameX, frameY);
+        tl.play();
+
+        posX.set(posX.get() + 140);
+        posY.set(posY.get() + 90);
+
+        tl.setOnFinished(new EventHandler<ActionEvent>() {
+                             @Override
+                             public void handle(ActionEvent event) {
+                                 isMoving = false;
+                             }
+                         }
+        );
+        /*posX.set(posX.get()+140);
+        posY.set(posY.get()+90);
+        sphere.setTranslateX(posX.get());
+        sphere.setTranslateY(posY.get());*/
     }
 
-    public void stopMoving(long time){
-        if(time - moveStart > 200000000){
-            // stopMoving
-            isMoving = false;
-        }
+    public void moveDown(){
+        isMoving = true;
+        Timeline tl = new Timeline();
+
+        KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 90, Interpolator.TANGENT(Duration.millis(500), 10, Duration.millis(500), -10));
+        KeyFrame frameX = new KeyFrame(Duration.millis(500), keyY);
+
+        KeyValue keyZ = new KeyValue(sphere.translateZProperty(), sphere.getTranslateZ() - 140);
+        KeyFrame frameY = new KeyFrame(Duration.millis(500), keyZ);
+
+        tl.getKeyFrames().addAll(frameX, frameY);
+        tl.play();
+
+        posY.set(posY.get() + 90);
+        posZ.set(posZ.get() - 140);
+        tl.setOnFinished((ActionEvent event) -> {
+                    isMoving = false;
+
+                }
+        );
+        /*posY.set(posY.get()+90);
+        posZ.set(posZ.get()-140);
+        sphere.setTranslateY(posY.get());
+        sphere.setTranslateZ(posZ.get());*/
+    }
+
+    public BoundingBox getBoundingBox(){
+        return new BoundingBox(getPosX().getValue(),getPosY().getValue(),getPosZ().getValue(),
+                getRadius(),getRadius(),getRadius());
     }
 
     private void updateBoundingBox(){

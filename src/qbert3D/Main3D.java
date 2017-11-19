@@ -12,6 +12,8 @@ import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -20,7 +22,7 @@ import javafx.stage.Stage;
 
 public class Main3D extends Application {
 
-    private Group group = new Group();
+    private Pane group = new Pane();
     private Group rotationGrop;
     private PerspectiveCamera camera = new PerspectiveCamera(true);
     Game3D game3D;
@@ -30,12 +32,6 @@ public class Main3D extends Application {
     public void start(Stage primaryStage) throws Exception{
 
         Camera camera;
-        player = new Player3D(340,350,637);
-        game3D = new Game3D(group,player);
-        group.setRotationAxis(Rotate.Y_AXIS);
-        group.setRotate(45);
-
-        SubScene subScene = new SubScene(group,1300,850,true,SceneAntialiasing.BALANCED);
 
         VBox vBox = new VBox(10);
         vBox.setPrefWidth(100);
@@ -45,6 +41,13 @@ public class Main3D extends Application {
         playerLives.setFont(Font.font ("Verdana", 23));
         playerLives.setTextFill(Color.BEIGE);
         vBox.getChildren().add(playerLives);
+
+        player = new Player3D(340,350,-180);
+        game3D = new Game3D(group,player,playerLives);
+        group.setRotationAxis(Rotate.Y_AXIS);
+        group.setRotate(45);
+        group.setStyle("-fx-background-color: black;");
+        SubScene subScene = new SubScene(group,1300,850,true,SceneAntialiasing.BALANCED);
 
         BorderPane borderPane = new BorderPane();
         borderPane.setStyle("-fx-background-color: #000000");
@@ -100,7 +103,23 @@ public class Main3D extends Application {
         subScene.setRoot(group);
         camera.setRotationAxis(Rotate.X_AXIS);
         camera.setRotate(-35);
-        camera.setTranslateY(-200);
+        camera.setTranslateX(-370);
+        camera.setTranslateY(-100);
+        camera.setTranslateZ(-400);
+
+        /*AmbientLight light=new AmbientLight(Color.AQUA);
+        light.setTranslateX(-180);
+        light.setTranslateY(-90);
+        light.setTranslateZ(-120);
+        light.getScope().addAll(group);*/
+
+        // dette lyset gir samme effekt som det ene levelet i q-bert med kun flater
+        /*PointLight light2=new PointLight(Color.AQUA);
+        light2.setTranslateX(180);
+        light2.setTranslateY(190);
+        light2.setTranslateZ(180);
+        light2.getScope().addAll(group);
+        group.getChildren().add(light2);*/
 
         //Parent root = FXMLLoader.load(getClass().getResource("game3D.fxml"));
         primaryStage.setTitle("Q-Bert");

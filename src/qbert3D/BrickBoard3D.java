@@ -19,7 +19,7 @@ public class BrickBoard3D {
     private int boxSizeZ = 140;
     private int boxX = 200;
     private int boxY;
-    private int boxZ = (boxSizeY+1)*7;
+    private int boxZ = -180;//(boxSizeY+1);//*7;
     //private PhongMaterial aliveColor = new PhongMaterial();
     private PhongMaterial deadColor = new PhongMaterial();
     private PhongMaterial aliveColor;
@@ -62,7 +62,7 @@ public class BrickBoard3D {
         //boxZ = boxSize+1;
     }
 
-    public void checkCollision(double x, double y, double z, double width, double height, double depth){
+    public boolean checkCollision(double x, double y, double z, double width, double height, double depth){
         int numBoxes = 7;
 
         for(int i = 0; i < boxes.length; i++){
@@ -75,7 +75,7 @@ public class BrickBoard3D {
                         if(box.getMaterial().equals(aliveColor)) {
                             box.setMaterial(deadColor);
                             aliveBoxes--;
-                            break;
+                            return true;
                         }
                     }
                 }
@@ -86,12 +86,30 @@ public class BrickBoard3D {
         if(aliveBoxes <= 0) {
             Task<Box> task = c -> c.setMaterial(new PhongMaterial(Color.DARKORCHID));
             traverseBoxes(task,boxes);
+            return true;
+        } else {
+            return false;
         }
     }
 
     public void setBoxColor(PhongMaterial material, Color color){
         material.setDiffuseColor(color);
         material.setSpecularColor(Color.web("#BFEFFF"));
+
+    }
+
+    public void changeBoxColor(PhongMaterial p){
+        int numBoxes = 7;
+
+        for(int i = 0; i < boxes.length; i++) {
+
+            for (int j = 0; j < boxes.length; j++) {
+                if (j < numBoxes) {
+                    boxes[i][j].setMaterial(p);
+                }
+            }
+            numBoxes--;
+        }
     }
 
     public <T> void traverseBoxes(Task<T> task, T[][] tArray){
