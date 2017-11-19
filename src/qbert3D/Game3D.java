@@ -28,7 +28,7 @@ public class Game3D {
     private long lastCreatedEnemy;
     private long lastMovedEnemy = 0;
     private Label playerLives;
-
+    // TODO: Legge inn abstrakt klasse for spill"objekter", player og enemy kan arve fra
     public Game3D(Pane group, Player3D player, Label playerLives){
         this.group = group;
         this.brickBoard = new BrickBoard3D();
@@ -37,7 +37,7 @@ public class Game3D {
         this.playerLives = playerLives;
 
         boxes = brickBoard.getBoxes();
-        player.setBoxes(boxes);
+        player.setBrickBoard(brickBoard);
         group.getChildren().add(player.getSphere());
         int numBoxes = 7;
 
@@ -50,8 +50,7 @@ public class Game3D {
             }
             numBoxes--;
         }
-        brickBoard.checkCollision(player.getSphere().getTranslateX(),player.getSphere().getTranslateY(),player.getSphere().getTranslateZ(),
-                player.getRadius(),player.getRadius(),player.getRadius());
+        brickBoard.checkCollision(player.getBoundingBox());
 
         animation = new AnimationTimer() {
             @Override
@@ -59,8 +58,7 @@ public class Game3D {
                 //System.out.println(player.getIsMoving());
                 moved = player.updatePlayer(now);
 
-                brickBoard.checkCollision(player.getSphere().getTranslateX(),player.getSphere().getTranslateY(),player.getSphere().getTranslateZ(),
-                        player.getRadius(),player.getRadius(),player.getRadius());
+                brickBoard.checkCollision(player.getBoundingBox());
 
                 if(player.isFalling()) player.fallDown();
 
@@ -86,7 +84,7 @@ public class Game3D {
 
     public void createEnemy(long now){
         if(now - lastCreatedEnemy > 3000){
-            Enemy3D enemy = new Enemy3D(200,260,-180);
+            Enemy3D enemy = new Enemy3D(200,260,-180,brickBoard);
             enemies.add(enemy); // X * 2 ? eller X / 2 ?
             group.getChildren().add(enemy.getSphere());
             lastCreatedEnemy = now;
@@ -143,6 +141,10 @@ public class Game3D {
             }
         }
     };
+
+    public void resetGame(){
+
+    }
 
     public void gameOver(){
         animation.stop();

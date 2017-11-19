@@ -30,6 +30,7 @@ public class Enemy3D {
             this.color = color;
         }
     }
+    private BrickBoard3D board;
     private double radius = 50;
     private Sphere sphere = new Sphere(radius);
     private BoundingBox bBox;
@@ -39,6 +40,7 @@ public class Enemy3D {
     private PhongMaterial color;
 
     private long moveStart;
+    private boolean fellDown = false;
     private boolean isMoving = false;
     private boolean left = false;
     private boolean up = false;
@@ -46,11 +48,12 @@ public class Enemy3D {
     private boolean down = false;
     private int direction = 0;  // 0 = null, 1 = left, 2 = up, 3 = right, 4 = down
 
-    public Enemy3D(double posX, double posY, double posZ){
+    public Enemy3D(double posX, double posY, double posZ, BrickBoard3D board){
         this.posX = new SimpleDoubleProperty(posX);
         this.posY = new SimpleDoubleProperty(posY);
         this.posZ = new SimpleDoubleProperty(posZ);
         this.bBox = new BoundingBox(posX,posY,posZ,50,50,50);
+        this.board = board;
 
         color = new PhongMaterial((System.currentTimeMillis()&1) ==0 ? Colors.YELLOW.color : Colors.PINK.color);
         color.setSpecularColor(Color.WHITE);
@@ -61,11 +64,13 @@ public class Enemy3D {
         sphere.setTranslateZ(posZ);
     }
 
-    public void move(){
-        if(Math.random() >= 0.5){
-            moveRight();
-        } else {
-            moveDown();
+    public void move() {
+        if (!fellDown) {
+            if (Math.random() >= 0.5) {
+                moveRight();
+            } else {
+                moveDown();
+            }
         }
     }
 
@@ -86,11 +91,14 @@ public class Enemy3D {
         posY.set(posY.get() + 90);
 
         tl.setOnFinished(new EventHandler<ActionEvent>() {
-                             @Override
-                             public void handle(ActionEvent event) {
-                                 isMoving = false;
-                             }
-                         }
+                 @Override
+                 public void handle(ActionEvent event) {
+                     isMoving = false;
+                     if(!board.simpleCheckCollision(getBoundingBox())){
+                         fallDown();
+                     }
+                 }
+             }
         );
         /*posX.set(posX.get()+140);
         posY.set(posY.get()+90);
@@ -114,14 +122,25 @@ public class Enemy3D {
         posY.set(posY.get() + 90);
         posZ.set(posZ.get() - 140);
         tl.setOnFinished((ActionEvent event) -> {
-                    isMoving = false;
-
+                isMoving = false;
+                if(!board.simpleCheckCollision(getBoundingBox())){
+                    fallDown();
                 }
+            }
         );
         /*posY.set(posY.get()+90);
         posZ.set(posZ.get()-140);
         sphere.setTranslateY(posY.get());
         sphere.setTranslateZ(posZ.get());*/
+    }
+
+    public void fallDown(){
+        fellDown = true;
+        KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 400);
+        KeyFrame frameX = new KeyFrame(Duration.millis(400), keyY);
+        Timeline tl = new Timeline();
+        tl.getKeyFrames().add(frameX);
+        tl.play();
     }
 
     public BoundingBox getBoundingBox(){

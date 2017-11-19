@@ -23,7 +23,8 @@ import javafx.util.Duration;
  */
 public class Player3D {
 
-    private Box[][] boxes = new Box[7][7];
+    //private Box[][] boxes = new Box[7][7];
+    private BrickBoard3D board;
     private double radius = 50;
     private Sphere sphere = new Sphere(radius);
     private BoundingBox bBox;
@@ -56,7 +57,6 @@ public class Player3D {
 
         mat.setDiffuseColor(Color.TURQUOISE);
         mat.setSpecularColor(Color.CORNSILK);
-        //sphere.setOpacity(0);
         sphere.setMaterial(mat);
         material = new PhongMaterial();
 
@@ -75,9 +75,8 @@ public class Player3D {
             return false;
         }
     }
-    // evt returnere boolean
+
     public boolean move(long time){
-        //System.out.println("right: " +right);
         if(!isMoving) {
             if (left && direction == 1) {
                 isMoving = true;
@@ -100,7 +99,7 @@ public class Player3D {
                                      @Override
                                      public void handle(ActionEvent event) {
                                          isMoving = false;
-                                         if(!checkCollision()){
+                                         if(!board.simpleCheckCollision(getBoundingBox())){
                                              fallDown();
                                          }
                                      }
@@ -128,7 +127,7 @@ public class Player3D {
                                      @Override
                                      public void handle(ActionEvent event) {
                                          isMoving = false;
-                                         if(!checkCollision()){
+                                         if(!board.simpleCheckCollision(getBoundingBox())){
                                              fallDown();
                                          }
                                      }
@@ -158,7 +157,7 @@ public class Player3D {
                                      @Override
                                      public void handle(ActionEvent event) {
                                          isMoving = false;
-                                         if(!checkCollision()){
+                                         if(!board.simpleCheckCollision(getBoundingBox())){
                                              fallDown();
                                          }
                                      }
@@ -183,13 +182,12 @@ public class Player3D {
                 posZ.set(posZ.get() - 140);
                 tl.setOnFinished((ActionEvent event) -> {
                                          isMoving = false;
-                                        if(!checkCollision()){
+                                        if(!board.simpleCheckCollision(getBoundingBox())){
                                             fallDown();
                                         }
                                  }
                 );
                 moveStart = time;
-                // hvis den etter animasjonen ikke har landet på bakken... skal den fortsette nedover.
 
                 return true;
             }
@@ -198,7 +196,6 @@ public class Player3D {
     }
 
     public void fallDown(){
-        //sphere.setOpacity(0);
         KeyValue keyY = new KeyValue(sphere.translateYProperty(), sphere.getTranslateY() + 400);
         KeyFrame frameX = new KeyFrame(Duration.millis(400), keyY);
         Timeline tl = new Timeline();
@@ -217,8 +214,8 @@ public class Player3D {
         return new BoundingBox(sphere.getTranslateX(),sphere.getTranslateY(),sphere.getTranslateZ(),
                 radius,radius,radius);
     }
-
-    public boolean checkCollision(){
+    // evt kun ta inn instansen av BrickBoard, så kalle på dens kollisjonsmetode
+    /*public boolean checkCollision(){
         int numBoxes = 7;
 
         for(int i = 0; i < boxes.length; i++) {
@@ -235,7 +232,7 @@ public class Player3D {
             numBoxes--;
         }
         return false;
-    }
+    }*/
 
     public Sphere getSphere(){
         return sphere;
@@ -245,8 +242,8 @@ public class Player3D {
         return isFalling;
     }
 
-    public void setBoxes(Box[][] boxes){
-    this.boxes = boxes;
+    public void setBrickBoard(BrickBoard3D board){
+    this.board = board;
     }
 
     public boolean getIsMoving(){

@@ -62,7 +62,7 @@ public class BrickBoard3D {
         //boxZ = boxSize+1;
     }
 
-    public boolean checkCollision(double x, double y, double z, double width, double height, double depth){
+    public boolean checkCollision(BoundingBox boundingBox){
         int numBoxes = 7;
 
         for(int i = 0; i < boxes.length; i++){
@@ -71,7 +71,7 @@ public class BrickBoard3D {
                 if(j < numBoxes) {
                     Box box = boxes[i][j];
                     BoundingBox bounds = new BoundingBox(box.getTranslateX()-50,box.getTranslateY()-50,box.getTranslateZ()-50,box.getWidth(),box.getHeight(),box.getDepth());
-                    if(bounds.intersects(x,y,z,width,height,depth)){
+                    if(bounds.intersects(boundingBox)){
                         if(box.getMaterial().equals(aliveColor)) {
                             box.setMaterial(deadColor);
                             aliveBoxes--;
@@ -90,6 +90,25 @@ public class BrickBoard3D {
         } else {
             return false;
         }
+    }
+
+    public boolean simpleCheckCollision(BoundingBox boundingBox){
+        int numBoxes = 7;
+
+        for(int i = 0; i < boxes.length; i++){
+
+            for(int j = 0; j < boxes.length; j++) {
+                if(j < numBoxes) {
+                    Box box = boxes[i][j];
+                    BoundingBox bounds = new BoundingBox(box.getTranslateX()-50,box.getTranslateY()-50,box.getTranslateZ()-50,box.getWidth(),box.getHeight(),box.getDepth());
+                    if(bounds.intersects(boundingBox)){
+                        return true;
+                    }
+                }
+            }
+            numBoxes--;
+        }
+        return false;
     }
 
     public void setBoxColor(PhongMaterial material, Color color){
